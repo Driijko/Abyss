@@ -18,7 +18,11 @@ Abyss was programmed using the p5 library for Javascript, and also uses code fro
 Soundeffects were taken from the sound archive Freesound (freesound.org).
 <br>
 Player Attacks soundeffect: Energy Short Sword 5.wav by ejfortin, https://freesound.org/people/ejfortin/sounds/49676/
+<br>
 Enemy Appears soundeffect: Granular Effect 1 by eryps, https://freesound.org/people/eryps/sounds/376759/
+<br>
 Enemy Hit 1 soundeffect: Sliding Trailer Woosh.flac by qubodup, https://freesound.org/people/qubodup/sounds/171255/
+<br>
 Enemy Hit 2 soundeffect: waterxplo.wav by inferno, https://freesound.org/people/inferno/sounds/18400/
+<br>
 Enemy Explodes soundeffect: ambience03.wav by yewbic, https://freesound.org/people/yewbic/sounds/33796/
