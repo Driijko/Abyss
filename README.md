@@ -16,6 +16,7 @@ SOFTWARE AND ASSETS
 Abyss was programmed using the p5 library for Javascript, and also uses code from the collide2D library for p5.
 
 Soundeffects were taken from the sound archive Freesound (freesound.org).
+<br>
 Player Attacks soundeffect: Energy Short Sword 5.wav by ejfortin, https://freesound.org/people/ejfortin/sounds/49676/
 Enemy Appears soundeffect: Granular Effect 1 by eryps, https://freesound.org/people/eryps/sounds/376759/
 Enemy Hit 1 soundeffect: Sliding Trailer Woosh.flac by qubodup, https://freesound.org/people/qubodup/sounds/171255/
