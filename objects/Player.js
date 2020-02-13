@@ -1,4 +1,4 @@
-function Player(gameAreaWidth, gameAreaHeight, bulletSet) {
+function Player(gameAreaWidth, gameAreaHeight) {
   this.width = Math.floor(gameAreaWidth / 15);
   this.height = Math.floor(this.width / 2);
 
@@ -7,14 +7,12 @@ function Player(gameAreaWidth, gameAreaHeight, bulletSet) {
 
   const center = [this.hpos + (this.width / 2), this.vpos + (this.height / 2)];
 
-  this.speed = Math.round(this.width / 20);
+  this.speed = Math.round(this.width / 10);
   this.vsp = 0;
   this.hsp = 0;
 
   const colorInterval = 5;
   let colorOffset = 0;
-
-  const shootInterval = 30;
 
   this.pause = false;
 
@@ -47,13 +45,17 @@ function Player(gameAreaWidth, gameAreaHeight, bulletSet) {
 
     center[0] = this.hpos + (this.width / 2);
     center[1] = this.vpos + (this.height / 2);
+
+    // We update the coordinates of the attack rect.
+    this.attackRect.x = this.hpos + this.width;
+    this.attackRect.y = this.vpos;
   }
 
   this.display = function() {
     ellipseMode(CORNER);
     strokeWeight(2)
 
-    if (frameCount % colorInterval === 0 && this.pause === false) {
+    if (frameCount % colorInterval === 0) {
       if (colorOffset === 255) {
         colorOffset = 0;
       }
@@ -81,10 +83,74 @@ function Player(gameAreaWidth, gameAreaHeight, bulletSet) {
     }
   }
 
-  this.shoot = function() {
-    if(frameCount % shootInterval === 0 && (! (this.pause))) {
-      bulletSet.createBullet(this.hpos + this.width - 5, this.vpos + (this.height / 3));
-      playerShootsSound.play(); 
+
+
+  // ATTACKING ////////////////////////////////////////////////////////////////////////////////////////
+  // The player can attack for a certain duration of time
+  this.attacking = false;
+  const attackTime = 5;
+  let attackTimer = 0;
+
+  // After attacking, there is a cooldown period.
+  this.attackCoolDown = false;
+  const attackCoolDownTime = 20;
+  let attackCoolDownTimer = 0;
+
+  // Here we define the area that contains the player's attack. 
+  this.attackRect = {
+    x : this.hpos + this.width,
+    y : this.vpos,
+    width: this.width * 2,
+    height: this.height
+  }
+
+  this.attack = function() {
+
+    // Attack Timing ////////////////////////////////////////////////////////////////
+    // Cool Down
+    if (this.attackCoolDown) {
+      if (attackCoolDownTimer <= attackCoolDownTime) {
+        attackCoolDownTimer += 1;
+      }
+      else {
+        this.attackCoolDown = false;
+        attackCoolDownTimer = 0;
+      }
+    }
+    // Attacking: the player can attack by pressing spacebar. We trigger a sound effect. 
+    else if (this.attacking === false && this.pause === false && keyIsDown(32)) {
+      this.attacking = true;
+      playerAttacksSound.play();
+    }
+    else if (this.attacking) {
+      if (attackTimer <= attackTime) {
+        attackTimer += 1;
+      }
+      else {
+        this.attacking = false;
+        attackTimer = 0;
+        this.attackCoolDown = true;
+      }
+    }
+
+    // Attack Display ////////////////////////////////////////////////////////////////
+    if (this.attacking) {
+      let attackEllipseX = this.attackRect.x + this.attackRect.width;
+      let attackEllipseY = this.attackRect.y;
+      let attackEllipseWidth = this.attackRect.height;
+      let attackEllipseHeight = this.attackRect.height;
+      ellipseMode(CORNER);
+      strokeWeight(3);
+
+      for (let i = 0 ; i < 5 ; i++ ) {
+        attackEllipseHeight = this.attackRect.height - ((this.attackRect.height / 7) * i);
+        attackEllipseX = attackEllipseX - (this.attackRect.width / 5);
+        attackEllipseY = this.attackRect.y + ((this.attackRect.height / 14) * i);
+        attackEllipseWidth = (this.attackRect.width / 5);
+        if (attackEllipseX >= this.attackRect.x) { 
+          ellipse(attackEllipseX, attackEllipseY, attackEllipseWidth, attackEllipseHeight);
+        }
+      }
     }
   }
 }

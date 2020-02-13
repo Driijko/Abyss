@@ -1,4 +1,5 @@
-function Enemy(position, size, speed, movementType, angleChange=0, waveHeight=0) {
+function Enemy(position, size, speed, movementType, angleChange=0, waveHeight=0, angle2Change=0, waveHeight2=0) {
+
   this.x = position[0];
   this.y = position[1];
   this.rect = {
@@ -9,6 +10,7 @@ function Enemy(position, size, speed, movementType, angleChange=0, waveHeight=0)
   }
   this.speed = speed;
   let angle = 0;
+  let angle2 = 0;
   this.pause = false;
 
   // Front Circle
@@ -32,6 +34,14 @@ function Enemy(position, size, speed, movementType, angleChange=0, waveHeight=0)
   const segmentParticleCoordinates = [];
   this.disintegrationCounter = 0;
 
+  // Explosion Spiral (es)
+  this.exploding = false;
+  let esAngle = 0.0;
+  let esScalar = 2;
+  let esSpeed = 1;
+  let explosionTimer = 0;
+
+
   // SoundEffects
   let entranceSoundPlayed = false;
   
@@ -43,7 +53,7 @@ function Enemy(position, size, speed, movementType, angleChange=0, waveHeight=0)
 
     // ENTRANCE SOUND EFFECT /////////////////////////////////////////////////////////////////
     // When the enemy passes into view, we play the "enemy enters" sound. 
-    if (this.x < gameArea.width && entranceSoundPlayed === false) {
+    if ((this.x - (size * 2)) < gameArea.width && entranceSoundPlayed === false) {
       enemyEntersSound.play();
       entranceSoundPlayed = true;
     }
@@ -78,10 +88,30 @@ function Enemy(position, size, speed, movementType, angleChange=0, waveHeight=0)
     if (this.x <= 0 && explosion === false) {
       pauseEverything();
       explosion = true;
+      this.exploding = true;
+      enemyExplodesSound.play();
     }
 
-    if (explosion) {
-      
+    if (this.exploding) {
+      strokeWeight(esAngle / 10);
+      stroke(255);
+      fill(0);
+      ellipse(
+        this.x + cos(esAngle) * esScalar,
+        this.y + sin(esAngle) * esScalar,
+        10, 
+        10
+      );
+      esAngle += esSpeed;
+      esScalar += esSpeed;
+
+      explosionTimer += 1;    
+    }
+    else if (explosion === true) {
+      strokeWeight(esAngle / 10);
+      stroke(255);
+      fill(0); 
+      esAngle += speed;
     }
 
     // TAIL ANIMATIONS //////////////////////////////////////////////////////////////////////////////////////////
@@ -99,7 +129,9 @@ function Enemy(position, size, speed, movementType, angleChange=0, waveHeight=0)
     for (let i = tailLength - 1 ; i > 0 ; i--) {
       tailPositions[i][0] = tailPositions[i - 1][0] + ((segmentDistance * speed) + Math.floor(Math.random() * 3));
 
-      tailPositions[i][1] = tailPositions[i - 1][1];
+      if (this.hit === false) {
+        tailPositions[i][1] = tailPositions[i - 1][1];
+      }
 
       if (i === brightSegment) {
         fill(255);
@@ -154,6 +186,11 @@ function Enemy(position, size, speed, movementType, angleChange=0, waveHeight=0)
           segmentParticleCoordinates[i][1]);
       }
     }
+
+    // GAME OVER !!!!! //////////////////////////////////////////////////////////////////
+    if (explosionTimer === (60 * 15)) {
+      mode = "game over";
+    }
   }
 
   // MOVEMENT ////////////////////////////////////////////////////////////////////////////////
@@ -168,6 +205,12 @@ function Enemy(position, size, speed, movementType, angleChange=0, waveHeight=0)
         this.x -= this.speed;
         this.y += sin(angle) * waveHeight;
         angle += angleChange;
+      }
+      else if (movementType === "double wave") {
+        this.x -= this.speed;
+        this.y += (sin(angle) * waveHeight) + (sin(angle2) * waveHeight2);
+        angle += angleChange;
+        angle2 += angle2Change;
       }
 
 

@@ -39,7 +39,30 @@ function pauseEverything() {
   for (const enemyIndex in enemySet.enemies) {
     enemySet.enemies[enemyIndex].pause = true;
   }
-  for (const bulletIndex in bulletSet.bullets) {
-    bulletSet.bullets[bulletIndex].pause = true;
+}
+
+function randRange(min, max) {
+  if (min < 0 && max <= 0) {
+    return min + Math.floor(Math.random() * (Math.abs(min) + max));
   }
+  else if (min < 0 && max >= 0) {
+    return Math.floor(Math.random() * (Math.abs(min) + Math.abs(max))) + min;
+  }
+  else if (min >= 0) {
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+}
+
+function minimum(min, comparative) {
+  if (min > comparative) {
+    return min;
+  }
+  else return comparative;
+}
+
+function maximum(max, comparative) {
+  if (max < comparative) {
+    return max;
+  }
+  else return comparative;
 }

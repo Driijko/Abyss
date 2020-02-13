@@ -12,15 +12,12 @@ const minHeight = 600;
 document.documentElement.style.overflow = "hidden";
 
 // Mode and Objects
-// let mode = "screen check";
-let mode = "game test";
-// let mode = "game test fullscreen";
+let mode = "screen check";
 let gameArea;
 let titleScreen;
 let survivalClock;
 let player;
-let bulletSet;
-let enemy;
+let enemySet;
 
 // VARIABLES
 // Opening Prompt
@@ -36,11 +33,12 @@ let explosion = false;
 const arrowImages = [];
 
 // Sounds
-let titleScreenMusic;
+let music;
 let playerShootsSound;
 let enemyEntersSound;
 let enemyHitSound0;
 let enemyHitSound1;
+let enemyExplodesSound;
 
 function preload() {
 
@@ -51,51 +49,38 @@ function preload() {
   arrowImages[3] = loadImage("./assets/images/arrowLeft.png");
 
   // Title Screen Music
-  titleScreenMusic = loadSound("./assets/sounds/music/Title Screen Music.mp3");
+  music = loadSound("./assets/sounds/music/music.mp3");
 
   // Sound effects /////////////////////////////////////////////////////////////////////
   // Player
-  playerShootsSound = loadSound("./assets/sounds/soundEffects/playerShoots0.wav");
-  playerShootsSound.setVolume(0.2);
+  playerAttacksSound = loadSound("./assets/sounds/soundEffects/playerAttacks.wav");
 
   // Enemy ////////////////////////////////////////////////////////////////////////////
   enemyEntersSound = loadSound("./assets/sounds/soundEffects/enemyEnters.wav");
-  enemyHitSound0 = loadSound("./assets/sounds/soundEffects/enemyHit1.wav");
-  enemyHitSound1 = loadSound("./assets/sounds/soundEffects/enemyHit5.wav");
+  enemyHitSound0 = loadSound("./assets/sounds/soundEffects/enemyHit0.wav");
+  enemyHitSound0.setVolume(0.5);
+  enemyHitSound1 = loadSound("./assets/sounds/soundEffects/enemyHit1.wav");
+  enemyHitSound1.setVolume(0.5);
+  enemyExplodesSound = loadSound("./assets/sounds/soundEffects/enemyExplosion.mp3");
 }
 
 
 // Setup ////////////////////////////////////////////////////////////////////////////////////////////
 function setup() {
 
-  if (mode === "game test") {
-    createCanvas(windowWidth, windowHeight);
-    gameArea = new GameArea(windowWidth, windowHeight);
-    survivalClock = new SurvivalClock(gameArea.width, gameArea.height);
-    bulletSet = new BulletSet(gameArea.width);
-    player = new Player(gameArea.width, gameArea.height, bulletSet);
-    // enemy = new Enemy([500, 400], 10, 1, "wave", 0.05, 3);
-    enemySet = new EnemySet();
-    mode = "game";
-  }
-  else if (mode === "game test fullscreen") {
-    createCanvas(screen.width, screen.height);
+  createCanvas(windowWidth, windowHeight);
+  background(0);
+  fill(255);
+  textFont("Dosis");
+  textSize(20);
+
+  // Screen is too small.
+  if (screen.width < minWidth || screen.height < minHeight) {
+    text(`Sorry, this game requires at least a ${minWidth} x ${minHeight} pixel display.`, 50, 50, windowWidth - 100, windowHeight);
+    text(`Your current device's screen: ${screen.width} x ${screen.height} display.`, 50, 200, windowWidth - 100, windowHeight);
   }
   else {
-    createCanvas(windowWidth, windowHeight);
-    background(0);
-    fill(255);
-    textFont("Dosis");
-    textSize(20);
-  
-    // Screen is too small.
-    if (screen.width < minWidth || screen.height < minHeight) {
-      text(`Sorry, this game requires at least a ${minWidth} x ${minHeight} pixel display.`, 50, 50, windowWidth - 100, windowHeight);
-      text(`Your current device's screen: ${screen.width} x ${screen.height} display.`, 50, 200, windowWidth - 100, windowHeight);
-    }
-    else {
-      mode = "opening prompt";
-    }
+    mode = "opening prompt";
   }
 }
 
@@ -142,7 +127,7 @@ function draw() {
       strokeWeight(0); 
       text("ENABLE FULLSCREEN", fsbcoordinates0[0], fsbcoordinates0[1], fsbcoordinates0[2], fsbcoordinates0[3]);
     }
-    // Full screen prompt.
+    // Window is minimum size or larger.
     else {
       textAlign(CENTER, CENTER);
       textSize(40);
@@ -197,9 +182,10 @@ function draw() {
     gameArea = new GameArea(windowWidth, windowHeight);
     titleScreen = new TitleScreen(gameArea.width, gameArea.height, arrowImages);
     survivalClock = new SurvivalClock(gameArea.width, gameArea.height);
-    bulletSet = new BulletSet(gameArea.width);
-    player = new Player(gameArea.width, gameArea.height, bulletSet);
-    titleScreenMusic.play();
+    player = new Player(gameArea.width, gameArea.height);
+    enemySet = new EnemySet();
+    music.play();
+    music.loop();
     mode = "title screen";
   }
   else if (mode === "title screen") {
@@ -209,55 +195,46 @@ function draw() {
     if(keyCode === ENTER) {
       mode = "game";
     }
-
-  }
-  else if (mode === "game test fullscreen") {
-    if (keyCode === ENTER) {
-      gameArea = new GameArea(screen.width, screen.height);
-      survivalClock = new SurvivalClock(gameArea.width, gameArea.height);
-      bulletSet = new BulletSet(gameArea.width);
-      player = new Player(gameArea.width, gameArea.height, bulletSet);
-      mode = "game";
-      transistionToFullScreen();
-    }
   }
   else if (mode === "game") {
     // Set up the game area and move the coordinate grid to it's top left corner.
     if (explosion === false) gameArea.display();
+    else {music.stop()}
     translate(gameArea.corner[0], gameArea.corner[1]);
 
     survivalClock.display();
-    
-    player.move();
-    player.display();
-    player.shoot();
-
-    for (const bullet in bulletSet.bullets) {
-      bulletSet.bullets[bullet].move();
-      bulletSet.bullets[bullet].display();
-    }
-    bulletSet.destroyOutOfBoundsBullet();
 
     enemySet.generateEnemies();
-    enemySet.checkIfEnemiesAreHitByBullets(bulletSet);
+    enemySet.checkIfEnemiesCollide(player);
 
     for (const enemy in enemySet.enemies) {
       enemySet.enemies[enemy].move();
       enemySet.enemies[enemy].display();
     }
 
+    player.move();
+    player.display();
+    player.attack();
 
-
-    // Pause Testing
-    // if (keyIsDown(ENTER)) {
-    //   player.pause = true;
-    //   enemySet.pause = true;
-    //   for (const enemy in enemySet.enemies) {
-    //     enemySet.enemies[enemy].pause = true;
-    //   }
-    //   for (const bullet in bulletSet.bullets) {
-    //     bulletSet.bullets[bullet].pause = true;
-    //   }
-    // }
+    // Cover the left and right edges with black blocks
+    if (gameArea.corner[0] > 0) {
+      fill(0);
+      strokeWeight(0);
+      rect(-gameArea.corner[0], -gameArea.corner[1], gameArea.corner[0], windowHeight);
+      rect(gameArea.width, gameArea.corner[1], windowWidth - gameArea.width, windowHeight);
+    }
+  }
+  else if (mode === "game over") {
+    translate(gameArea.corner[0], gameArea.corner[1]);
+    textSize(100);
+    textFont("Dosis");
+    strokeWeight(20);
+    stroke(255);
+    fill(0);
+    text("GAME OVER", 0, gameArea.height / 4, gameArea.width, 200);
+    textSize(50);
+    text(`Survival Time:    ${survivalClock.timeString}`, 0, gameArea.height / 2, gameArea.width, 100);
+    textSize(35);
+    text("Refresh the page to play again.", 0, gameArea.height - 100, gameArea.width, 50);
   }
 }

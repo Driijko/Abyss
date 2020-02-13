@@ -1,15 +1,13 @@
 function GameArea(windowWidth, windowHeight) {
 
-  const smallerDimension = windowWidth >= windowHeight ? "height" : "width";
-  if (smallerDimension === "height") {
+  // The game area ratio is 4:3. 
+  if ((windowWidth / 4) >= (windowHeight / 3)) {
     this.height = windowHeight;
-    const heightIncrease = (windowHeight - minHeight) / minHeight;
-    this.width = Math.round(minWidth + (minWidth * heightIncrease));
+    this.width = (this.height / 3) * 4;
   }
   else {
     this.width = windowWidth;
-    const widthIncrease = (windowWidth - minWidth) / minWidth;
-    this.height = Math.round(minHeight + (minHeight * widthIncrease));
+    this.height = (this.width / 4) * 3;
   }
 
   this.corner = [center(windowWidth, this.width), center(windowHeight, this.height)];

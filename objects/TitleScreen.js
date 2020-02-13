@@ -2,18 +2,18 @@ function TitleScreen(gameAreaWidth, gameAreaHeight, arrowImages) {
   
   this.display = function() {
 
-    textFont("Jim Nightshade");
+    textFont("Dosis");
     fill(255);
     strokeWeight(0);
 
     // Title
-    textSize(gameAreaHeight / 4);
+    textSize(gameAreaHeight / 6);
     textAlign(CENTER)
     text("Abyss", 0, gameAreaHeight / 4, gameAreaWidth);
 
     // Instructions
     const gameCenter = gameAreaWidth/2;
-    const smallTextSize = gameAreaHeight / 20;
+    const smallTextSize = gameAreaHeight / 30;
     textSize(smallTextSize);
     const letters = ["w", "d", "s", "a"];
 
@@ -25,7 +25,8 @@ function TitleScreen(gameAreaWidth, gameAreaHeight, arrowImages) {
       pop();
     }
 
-    const coords = [gameCenter - 100, gameAreaHeight - (gameAreaHeight / 4), 200, 100];
+    text("Press the space bar to attack", gameCenter - 200, gameAreaHeight - (gameAreaHeight / 3), 400, 200);
+
     text("Press    ENTER    to begin", gameCenter - 200, gameAreaHeight - (gameAreaHeight / 4), 400, 200);
   }
 }
